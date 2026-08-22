@@ -1199,15 +1199,100 @@ async def predict_failure(
 
     risk_level = "LOW" if prob < 0.03 else "MEDIUM" if prob < PREEMPTIVE_THRESHOLD else "HIGH"
 
+    # --- Explainable AI (XAI) Mock Logic ---
+    xai_factors = []
+    
+    # 1. Bank Factor
+    if bank in ["Yes Bank", "PNB", "IDBI"]:
+        xai_factors.append({"factor": "Bank historical downtime (Elevated)", "impact": "+45%"})
+    elif bank in ["SBI", "BOB"]:
+        xai_factors.append({"factor": "Peak hour latency (Moderate)", "impact": "+20%"})
+    else:
+        xai_factors.append({"factor": f"Optimal routing available for {bank}", "impact": "-15%"})
+
+    # 2. Instrument Factor
+    if instrument == "netbanking":
+        xai_factors.append({"factor": "Multi-step auth drop-off risk", "impact": "+30%"})
+    elif instrument == "card":
+        xai_factors.append({"factor": "3D Secure OTP failure risk", "impact": "+15%"})
+    else:
+        xai_factors.append({"factor": "UPI fast-track settlement", "impact": "-25%"})
+
+    # 3. Amount/Time Factor
+    if amount >= 50000:
+        xai_factors.append({"factor": "High-value scrutiny & limits", "impact": "+25%"})
+    elif now.hour >= 23 or now.hour <= 4:
+        xai_factors.append({"factor": "Night-time batch processing window", "impact": "+35%"})
+    else:
+        xai_factors.append({"factor": "Standard transaction value/time", "impact": "Neutral"})
+
     return {
         "bank": bank,
         "instrument": instrument,
         "amount": amount,
         "failure_probability": prob,
         "risk_level": risk_level,
+        "xai_factors": xai_factors,
         "recommendation": "preemptive_switch" if prob > PREEMPTIVE_THRESHOLD else "proceed",
         "timestamp": now.isoformat(),
     }
+
+
+# ---- GenAI Personalized Messaging ----
+
+class GenAIMessageRequest(BaseModel):
+    payment_id: str
+    amount: int
+    channel: str
+    reasoning: str
+
+@app.post("/api/generate-message")
+async def generate_message(req: GenAIMessageRequest):
+    """
+    Simulates a GenAI LLM generating a hyper-personalized recovery message
+    based on the failure context. In production, this would call Gemini API.
+    """
+    import asyncio
+    await asyncio.sleep(1.5)  # Simulate LLM thinking time
+    
+    amount_str = f"₹{req.amount // 100:,.2f}"
+    
+    prompt_context = req.reasoning.lower()
+    
+    if "insufficient" in prompt_context or "limit" in prompt_context:
+        msg = (
+            f"Hi there! We noticed your payment of {amount_str} couldn't go through. "
+            f"If it helps, we've unlocked a Buy-Now-Pay-Later (EMI) option for you. "
+            f"Would you like to complete your purchase using EMI? Tap here to retry securely."
+        )
+    elif "otp" in prompt_context or "auth" in prompt_context:
+        msg = (
+            f"Hi! Your transaction of {amount_str} was interrupted due to an authentication timeout. "
+            f"No worries, your cart is still saved! You can complete the payment seamlessly via UPI "
+            f"using this direct link."
+        )
+    elif "bank" in prompt_context or "timeout" in prompt_context or "network" in prompt_context:
+        msg = (
+            f"Hello! Your bank's server seems to be experiencing temporary delays, causing your "
+            f"{amount_str} payment to fail. We recommend trying again with an alternate payment "
+            f"method (like a different bank or UPI) to instantly confirm your order."
+        )
+    else:
+        msg = (
+            f"Hi! It looks like your recent payment of {amount_str} was unsuccessful. "
+            f"Don't worry, we have reserved your items. Tap this secure link to try again "
+            f"and complete your order smoothly."
+        )
+
+    # Wrap in channel specific formatting
+    if req.channel == "whatsapp":
+        msg = "🟢 *RecoverIQ WhatsApp AI* \n\n" + msg
+    elif req.channel == "sms":
+        msg = "📱 RecoverIQ SMS:\n" + msg
+    
+    return {"message": msg, "generated_at": datetime.now().isoformat()}
+
+
 
 
 # ---- Seed Demo Data ----

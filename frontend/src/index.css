@@ -1504,3 +1504,107 @@ input:focus-visible {
   }
 }
 
+
+/* ── GenAI Messaging Styles ── */
+.genai-btn {
+  background: linear-gradient(135deg, #00d4ff 0%, #0072ff 100%);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  cursor: pointer;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  transition: all 0.2s;
+}
+
+.genai-btn:hover {
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.genai-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.genai-message-box {
+  background: rgba(0, 212, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.genai-message-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: #00d4ff;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.genai-message-text {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* ── XAI Panel Styles ── */
+.xai-container {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.xai-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.xai-factor-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.xai-factor-name {
+  color: var(--text-primary);
+}
+
+.xai-factor-impact {
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.xai-factor-impact.positive {
+  color: #ff5252;
+}
+
+.xai-factor-impact.negative {
+  color: #00e676;
+}

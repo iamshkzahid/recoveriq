@@ -210,6 +210,103 @@ const KPICard = ({ title, value, prefix, suffix, icon: Icon, color, trend, trend
 // RECOVERY TIMELINE COMPONENT
 // =============================================================================
 
+const TimelineItem = ({ action }) => {
+  const [genAiMessage, setGenAiMessage] = useState(null);
+  const [generating, setGenerating] = useState(false);
+
+  const generateMessage = async () => {
+    setGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE}/generate-message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          payment_id: action.payment_id,
+          amount: action.amount,
+          channel: action.channel,
+          reasoning: action.reasoning,
+        }),
+      });
+      if (!res.ok) throw new Error("API unavailable");
+      const data = await res.json();
+      setGenAiMessage(data.message);
+    } catch (err) {
+      // Fallback for static frontend-only deployment
+      const amountStr = `₹${(action.amount / 100).toLocaleString()}`;
+      setGenAiMessage(`🟢 *RecoverIQ WhatsApp AI* \n\nHi! We noticed your payment of ${amountStr} couldn't go through. If it helps, we've unlocked a Buy-Now-Pay-Later (EMI) option for you. Tap here to retry securely.`);
+    }
+    setGenerating(false);
+  };
+
+  const canGenerate = action.channel === "whatsapp" || action.channel === "sms";
+
+  return (
+    <motion.div
+      className="timeline-item"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div
+        className="timeline-status-dot"
+        style={{ background: getStatusColor(action.status) }}
+      />
+      <div className="timeline-content">
+        <div className="timeline-top">
+          <span className="timeline-amount">{formatINR(action.amount)}</span>
+          <span
+            className="timeline-status-badge"
+            style={{
+              background: `${getStatusColor(action.status)}20`,
+              color: getStatusColor(action.status),
+            }}
+          >
+            {action.status}
+          </span>
+        </div>
+        <div className="timeline-details">
+          <span className="timeline-channel">
+            <ChannelIcon channel={action.channel} size={14} />
+            {action.channel || "—"}
+          </span>
+          <span className="timeline-strategy">{action.strategy?.replace(/_/g, " ")}</span>
+          {canGenerate && !genAiMessage && (
+            <button 
+              className="genai-btn" 
+              onClick={generateMessage}
+              disabled={generating}
+              title="Draft personalized recovery message with AI"
+            >
+              {generating ? <RefreshCw size={12} className="spin" /> : "✨ Draft AI Message"}
+            </button>
+          )}
+        </div>
+        <p className="timeline-reasoning">{action.reasoning}</p>
+        
+        {/* GenAI Message Display */}
+        {genAiMessage && (
+          <motion.div 
+            className="genai-message-box"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+          >
+            <div className="genai-message-header">
+              <Zap size={12} color="#00d4ff" /> 
+              <span>AI Generated Message</span>
+            </div>
+            <p className="genai-message-text">{genAiMessage}</p>
+          </motion.div>
+        )}
+
+        <span className="timeline-time">
+          <Clock size={12} /> {getRelativeTime(action.created_at)}
+        </span>
+      </div>
+    </motion.div>
+  );
+};
+
 const RecoveryTimeline = ({ actions }) => (
   <motion.div
     className="dashboard-card timeline-card"
@@ -229,44 +326,7 @@ const RecoveryTimeline = ({ actions }) => (
     <div className="timeline-container">
       <AnimatePresence>
         {actions.map((action, i) => (
-          <motion.div
-            key={action.action_id || i}
-            className="timeline-item"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div
-              className="timeline-status-dot"
-              style={{ background: getStatusColor(action.status) }}
-            />
-            <div className="timeline-content">
-              <div className="timeline-top">
-                <span className="timeline-amount">{formatINR(action.amount)}</span>
-                <span
-                  className="timeline-status-badge"
-                  style={{
-                    background: `${getStatusColor(action.status)}20`,
-                    color: getStatusColor(action.status),
-                  }}
-                >
-                  {action.status}
-                </span>
-              </div>
-              <div className="timeline-details">
-                <span className="timeline-channel">
-                  <ChannelIcon channel={action.channel} size={14} />
-                  {action.channel || "—"}
-                </span>
-                <span className="timeline-strategy">{action.strategy?.replace(/_/g, " ")}</span>
-              </div>
-              <p className="timeline-reasoning">{action.reasoning}</p>
-              <span className="timeline-time">
-                <Clock size={12} /> {getRelativeTime(action.created_at)}
-              </span>
-            </div>
-          </motion.div>
+          <TimelineItem key={action.action_id || i} action={action} />
         ))}
       </AnimatePresence>
       {actions.length === 0 && (
@@ -684,6 +744,26 @@ const RiskPredictionPanel = () => {
                 ? "✅ Safe to proceed — low failure probability"
                 : "⚠️ Recommend preemptive instrument switch"}
             </p>
+            
+            {/* XAI Factors Section */}
+            {prediction.xai_factors && prediction.xai_factors.length > 0 && (
+              <div className="xai-container">
+                <div className="xai-header">
+                  <Activity size={14} /> Explainable AI (Model Factors)
+                </div>
+                {prediction.xai_factors.map((factor, idx) => {
+                  const isPositive = factor.impact.startsWith("-");
+                  return (
+                    <div key={idx} className="xai-factor-row">
+                      <span className="xai-factor-name">{factor.factor}</span>
+                      <span className={`xai-factor-impact ${isPositive ? "positive" : "negative"}`}>
+                        {factor.impact}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         )}
       </div>
