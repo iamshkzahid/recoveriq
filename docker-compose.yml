@@ -1,0 +1,33 @@
+version: '3.8'
+
+# ═══════════════════════════════════════════
+# RecoverIQ — Docker Compose
+# Single command to run the entire stack
+# ═══════════════════════════════════════════
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - LOG_LEVEL=INFO
+      - RAZORPAY_WEBHOOK_SECRET=recoveriq_test_secret
+    volumes:
+      - ./backend:/app/backend
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE=http://backend:8000/api
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -1,0 +1,18 @@
+# RecoverIQ — Python Backend Dependencies
+
+# Core Framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.1
+pydantic>=2.7.0
+
+# Data Science & ML
+pandas>=2.2.0
+numpy>=1.26.0
+scikit-learn>=1.5.0
+joblib>=1.4.0
+
+# HTTP Client (for Razorpay API calls)
+httpx>=0.27.0
+
+# Environment variables
+python-dotenv>=1.0.0
