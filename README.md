@@ -348,6 +348,16 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
+## 🚀 Live Deployments
+
+- **Frontend Application (Netlify):** [https://recoveriq-ai-buildathon-2026.netlify.app](https://recoveriq-ai-buildathon-2026.netlify.app)
+- **Frontend Fallback (GitHub Pages):** [https://iamshkzahid.github.io/recoveriq/](https://iamshkzahid.github.io/recoveriq/)
+- **Backend API (Local Dev):** `http://localhost:8000/docs`
+
+> *Note: When deployed statically to Netlify or GitHub Pages without the backend, the dashboard will automatically fall back to **Demo Mode**, utilizing a rich mock dataset representing realistic Indian banking metrics.*
+
+---
+
 <p align="center">
   Built with ❤️ for Razorpay AI Buildathon 2026
   <br/>
