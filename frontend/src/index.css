@@ -252,16 +252,17 @@ body::before {
 /* ── KPI Grid ── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-md);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
 }
 
 @media (max-width: 1024px) {
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 600px) {
-  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 .kpi-card {
@@ -342,12 +343,12 @@ body::before {
 /* ── Dashboard Grid (Main Content) ── */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-lg);
 }
 
 @media (max-width: 1024px) {
-  .dashboard-grid { grid-template-columns: 1fr; }
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 .grid-left,
@@ -355,6 +356,7 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  min-width: 0;
 }
 
 /* ── Dashboard Card (Shared) ── */
@@ -1096,12 +1098,12 @@ input:focus-visible {
   }
 
   .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-sm);
   }
 
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-md);
   }
 
@@ -1157,7 +1159,7 @@ input:focus-visible {
 
   /* KPI grid: 2 columns on tablet */
   .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-sm);
   }
 
@@ -1180,7 +1182,7 @@ input:focus-visible {
 
   /* Main grid stacks */
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-md);
   }
 
