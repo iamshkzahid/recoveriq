@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-RecoverIQ — Master Video Stitcher & Renderer
-Syncs Playwright recorded webm clips with Edge-TTS audio files,
-applies audio-video sync, smooth transitions, and outputs `recoveriq_pitch.mp4`.
+RecoverIQ — Master Video Stitcher & Renderer (Gold Master Pitch)
+Syncs all 6 Playwright clips (UI Demo, Split-Screen Webhooks, XAI & GenAI, Architecture Diagram, VSCode Deep Dive, Conclusion)
+with Edge-TTS audio files and compiles `recoveriq_gold_pitch.mp4`.
 """
 
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -17,14 +18,18 @@ PROCESSED_DIR = BASE_DIR / "processed_clips"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 PROJECT_ROOT = Path("/Users/zahidshaikh/Desktop/Project")
-FINAL_OUTPUT = PROJECT_ROOT / "recoveriq_pitch.mp4"
+FINAL_OUTPUT = PROJECT_ROOT / "recoveriq_gold_pitch.mp4"
+ULTIMATE_COPY = PROJECT_ROOT / "recoveriq_ultimate_pitch.mp4"
+FINAL_PITCH_COPY = PROJECT_ROOT / "recoveriq_final_pitch.mp4"
+LEGACY_COPY = PROJECT_ROOT / "recoveriq_pitch.mp4"
 
 CLIP_FILENAME_MAP = {
     "part1_hook": "clip1_hook.webm",
     "part2_architecture": "clip2_architecture.webm",
-    "part3_xai_retry": "clip3_xai_retry.webm",
-    "part4_genai": "clip4_genai.webm",
-    "part5_impact": "clip5_impact.webm",
+    "part3_xai_genai": "clip3_xai_genai.webm",
+    "part4_system_architecture": "clip4_system_architecture.webm",
+    "part5_code_deepdive": "clip5_code_deepdive.webm",
+    "part6_conclusion": "clip6_conclusion.webm",
 }
 
 def get_media_duration(file_path: Path) -> float:
@@ -40,7 +45,6 @@ def get_media_duration(file_path: Path) -> float:
         except ValueError:
             pass
 
-    # Fallback for WebM streams with unindexed durations: read container via ffprobe packet decoding
     cmd2 = [
         "ffprobe", "-v", "error", "-select_streams", "v:0",
         "-show_entries", "stream=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(file_path)
@@ -53,7 +57,7 @@ def get_media_duration(file_path: Path) -> float:
         except ValueError:
             pass
 
-    return 45.0  # Safe default estimate
+    return 30.0
 
 def process_part(part_id: str, title: str, audio_file: Path, video_file: Path) -> Path:
     audio_dur = get_media_duration(audio_file)
@@ -62,8 +66,6 @@ def process_part(part_id: str, title: str, audio_file: Path, video_file: Path) -
     print(f"\n⚙️ Processing {part_id} ({title}):")
     print(f"  Audio Duration: {audio_dur:.2f}s | Source: {video_file.name}")
     
-    # We apply tpad so if video is slightly shorter than audio, the final frame is held
-    # and we use -shortest so it cuts exactly when the audio finishes (+0.5s breathing room)
     filter_complex = (
         "[0:v]tpad=stop_mode=clone:stop_duration=60,"
         "scale=1920:1080:force_original_aspect_ratio=decrease,"
@@ -80,7 +82,7 @@ def process_part(part_id: str, title: str, audio_file: Path, video_file: Path) -
         "-map", "[a]",
         "-c:v", "libx264",
         "-preset", "fast",
-        "-crf", "20",
+        "-crf", "19",
         "-c:a", "aac",
         "-b:a", "192k",
         "-shortest",
@@ -93,7 +95,7 @@ def process_part(part_id: str, title: str, audio_file: Path, video_file: Path) -
     return out_mp4
 
 def concatenate_all(synced_files: list) -> Path:
-    print(f"\n🎞️ Concatenating all {len(synced_files)} parts into final pitch video...")
+    print(f"\n🎞️ Concatenating all {len(synced_files)} parts into Gold Master pitch video...")
     concat_list = PROCESSED_DIR / "concat_list.txt"
     with open(concat_list, "w") as f:
         for p in synced_files:
@@ -113,10 +115,18 @@ def concatenate_all(synced_files: list) -> Path:
     ]
     subprocess.run(cmd, check=True)
     
+    # Mirror copies
+    try:
+        shutil.copy(str(FINAL_OUTPUT), str(ULTIMATE_COPY))
+        shutil.copy(str(FINAL_OUTPUT), str(FINAL_PITCH_COPY))
+        shutil.copy(str(FINAL_OUTPUT), str(LEGACY_COPY))
+    except Exception:
+        pass
+    
     total_dur = get_media_duration(FINAL_OUTPUT)
     file_size_mb = FINAL_OUTPUT.stat().st_size / (1024 * 1024)
     print(f"\n=======================================================")
-    print(f"🏆 RECOVERIQ FINAL PITCH VIDEO READY!")
+    print(f"🏆 RECOVERIQ GOLD MASTER PITCH VIDEO READY!")
     print(f"📁 Location: {FINAL_OUTPUT}")
     print(f"⏱️ Duration: {total_dur:.2f} seconds ({total_dur/60:.2f} minutes)")
     print(f"💾 File Size: {file_size_mb:.2f} MB")

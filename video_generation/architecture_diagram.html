@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RecoverIQ — End-to-End System Architecture</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, monospace; }
+    body { background: #08090d; color: #f0f0f5; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* Top Navigation Header */
+    .top-nav {
+      height: 60px;
+      background: #0e1117;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+    .logo-badge { display: flex; align-items: center; gap: 12px; font-size: 1.2rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; }
+    .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #00d4ff, #0055ff); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 0 12px #00d4ff; }
+    .arch-tag { background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.4); color: #00e676; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; font-family: monospace; }
+
+    /* Main Architecture Canvas */
+    .canvas-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.04) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+    }
+
+    .diagram-grid {
+      display: grid;
+      grid-template-columns: 240px 60px 280px 60px 280px 60px 260px;
+      align-items: center;
+      max-width: 1720px;
+      width: 100%;
+      gap: 0;
+    }
+
+    /* Architecture Nodes */
+    .arch-node {
+      background: #11141c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 18px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+    }
+    .arch-node.highlight-blue { border-color: #00d4ff; box-shadow: 0 0 25px rgba(0, 212, 255, 0.25); }
+    .arch-node.highlight-purple { border-color: #e040fb; box-shadow: 0 0 25px rgba(224, 64, 251, 0.25); }
+    .arch-node.highlight-green { border-color: #00e676; box-shadow: 0 0 25px rgba(0, 230, 118, 0.25); }
+    .arch-node.highlight-amber { border-color: #ffab00; box-shadow: 0 0 25px rgba(255, 171, 0, 0.25); }
+
+    .node-header { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; }
+    .node-badge { font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-weight: bold; }
+    .badge-blue { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+    .badge-purple { background: rgba(224, 64, 251, 0.2); color: #e040fb; }
+    .badge-green { background: rgba(0, 230, 118, 0.2); color: #00e676; }
+    .badge-amber { background: rgba(255, 171, 0, 0.2); color: #ffab00; }
+
+    .node-list { list-style: none; font-size: 0.8rem; color: #a0a5b5; line-height: 1.6; }
+    .node-list li { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .node-list li::before { content: "•"; color: #00d4ff; font-weight: bold; }
+
+    /* Flow Connectors */
+    .flow-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .flow-line {
+      height: 3px;
+      width: 100%;
+      background: linear-gradient(90deg, #00d4ff, #e040fb);
+      position: relative;
+      box-shadow: 0 0 10px #00d4ff;
+    }
+    .flow-label {
+      font-size: 0.68rem;
+      color: #8a94a6;
+      font-family: monospace;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    /* Stacked Nodes in Column 5 (Dual Waterfall) */
+    .dual-waterfall-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Bottom KPI Stats Banner */
+    .arch-footer {
+      height: 55px;
+      background: #0e1117;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 40px;
+      font-size: 0.85rem;
+    }
+    .stat-pill { display: flex; align-items: center; gap: 8px; }
+    .stat-val { font-weight: 800; color: #00e676; font-size: 1.05rem; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="top-nav">
+    <div class="logo-badge">
+      <div class="logo-icon">🛡️</div>
+      <span>RecoverIQ — System Architecture</span>
+    </div>
+    <div class="arch-tag">DUAL-WATERFALL AI RECOVERY ENGINE</div>
+  </div>
+
+  <!-- Main Canvas -->
+  <div class="canvas-container">
+    <div class="diagram-grid">
+      
+      <!-- Column 1: Razorpay Webhook Emitter -->
+      <div class="arch-node highlight-amber">
+        <div class="node-header" style="color: #ffab00;">
+          <span>⚡ Webhook Ingestion</span>
+          <span class="node-badge badge-amber">SOURCE</span>
+        </div>
+        <ul class="node-list">
+          <li><code>payment.failed</code> events</li>
+          <li>HMAC SHA-256 Signature</li>
+          <li>Raw byte payload stream</li>
+          <li>Sub-15ms webhook delivery</li>
+        </ul>
+      </div>
+
+      <!-- Arrow 1 -->
+      <div class="flow-arrow">
+        <div class="flow-line"></div>
+        <div class="flow-label">HTTP POST</div>
+      </div>
+
+      <!-- Column 2: FastAPI Security & Idempotency -->
+      <div class="arch-node highlight-blue">
+        <div class="node-header" style="color: #00d4ff;">
+          <span>🔒 Cryptographic Guard</span>
+          <span class="node-badge badge-blue">FASTAPI</span>
+        </div>
+        <ul class="node-list">
+          <li><code>await request.body()</code> raw bytes</li>
+          <li><code>hmac.compare_digest()</code></li>
+          <li>In-Memory TTL Cache</li>
+          <li>SQLite Composite Unique Constraint</li>
+        </ul>
+      </div>
+
+      <!-- Arrow 2 -->
+      <div class="flow-arrow">
+        <div class="flow-line"></div>
+        <div class="flow-label">VERIFIED</div>
+      </div>
+
+      <!-- Column 3: ML Inference & Strategy Router -->
+      <div class="arch-node highlight-purple">
+        <div class="node-header" style="color: #e040fb;">
+          <span>🧠 AI Strategy Router</span>
+          <span class="node-badge badge-purple">&lt;15MS ML</span>
+        </div>
+        <ul class="node-list">
+          <li>GradientBoosting Classifier</li>
+          <li>Explainable AI (XAI) attribution</li>
+          <li>Soft vs. Hard decline bifurcation</li>
+          <li>Compliance stopping rules</li>
+        </ul>
+      </div>
+
+      <!-- Arrow 3 -->
+      <div class="flow-arrow">
+        <div class="flow-line"></div>
+        <div class="flow-label">ROUTE</div>
+      </div>
+
+      <!-- Column 4: Dual Recovery Waterfall -->
+      <div class="dual-waterfall-col">
+        <!-- Soft Failures -->
+        <div class="arch-node highlight-green" style="padding: 14px;">
+          <div class="node-header" style="color: #00e676;">
+            <span>🔄 Smart Retry Queue</span>
+            <span class="node-badge badge-green">SOFT FAILS</span>
+          </div>
+          <ul class="node-list">
+            <li>Bank timeouts & gateway drops</li>
+            <li>Peak uptime window (2-6 PM)</li>
+            <li>Zero customer disruption</li>
+          </ul>
+        </div>
+        <!-- Hard Failures -->
+        <div class="arch-node highlight-purple" style="padding: 14px;">
+          <div class="node-header" style="color: #e040fb;">
+            <span>✨ GenAI LLM Agent</span>
+            <span class="node-badge badge-purple">HARD FAILS</span>
+          </div>
+          <ul class="node-list">
+            <li>Insufficient funds / Limit drops</li>
+            <li>Contextual 3-Month EMI Links</li>
+            <li>Branded WhatsApp / SMS</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Arrow 4 -->
+      <div class="flow-arrow">
+        <div class="flow-line"></div>
+        <div class="flow-label">STREAM</div>
+      </div>
+
+      <!-- Column 5: Merchant Dashboard & Observability -->
+      <div class="arch-node highlight-blue">
+        <div class="node-header" style="color: #00d4ff;">
+          <span>📊 Real-Time Dashboard</span>
+          <span class="node-badge badge-blue">REACT SSE</span>
+        </div>
+        <ul class="node-list">
+          <li>Live Recovery Timeline</li>
+          <li>Bank Failure Density Heatmap</li>
+          <li>Channel Conversion Metrics</li>
+          <li>Immutable Audit Log</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer Stats -->
+  <div class="arch-footer">
+    <div class="stat-pill"><span>Model Accuracy:</span> <span class="stat-val">0.81 AUC-ROC</span></div>
+    <div class="stat-pill"><span>Ingestion Latency:</span> <span class="stat-val">&lt; 15ms</span></div>
+    <div class="stat-pill"><span>GMV Recovery Rate:</span> <span class="stat-val">27.7%</span></div>
+    <div class="stat-pill"><span>Enterprise Value:</span> <span class="stat-val">₹1,860 Cr / yr</span></div>
+  </div>
+</body>
+</html>

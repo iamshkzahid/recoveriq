@@ -62,3 +62,11 @@ ehthumbs.db
 
 # Local Netlify folder
 .netlify
+
+# Video Generation Artifacts
+*.mp4
+*.webm
+*.mp3
+video_generation/raw_clips/
+video_generation/processed_clips/
+video_generation/audio/

@@ -1,5 +1,0 @@
-file '/Users/zahidshaikh/Desktop/Project/video_generation/processed_clips/part1_hook_synced.mp4'
-file '/Users/zahidshaikh/Desktop/Project/video_generation/processed_clips/part2_architecture_synced.mp4'
-file '/Users/zahidshaikh/Desktop/Project/video_generation/processed_clips/part3_xai_retry_synced.mp4'
-file '/Users/zahidshaikh/Desktop/Project/video_generation/processed_clips/part4_genai_synced.mp4'
-file '/Users/zahidshaikh/Desktop/Project/video_generation/processed_clips/part5_impact_synced.mp4'

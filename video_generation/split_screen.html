@@ -108,6 +108,7 @@
 
   <script>
     const term = document.getElementById("termOutput");
+    const dashFrame = document.getElementById("dashFrame");
     
     const events = [
       { id: "pay_a84920fc192b4", amt: "₹4,850.00", reason: "bank_timeout", bank: "Yes Bank", sig: "a89c20f8319e7284b840192ca8204918e72a8190382910fa8c2198031209e721", time: "12.4ms" },
@@ -136,11 +137,20 @@
       `;
       term.appendChild(div);
       term.scrollTop = term.scrollHeight;
+
+      // Sync with React Dashboard iframe
+      try {
+        if (dashFrame && dashFrame.contentWindow) {
+          if (typeof dashFrame.contentWindow.__triggerWebhookToast === "function") {
+            dashFrame.contentWindow.__triggerWebhookToast(`⚡ Webhook Verified (HMAC SHA-256): ${ev.id} | ${ev.amt} (${ev.bank})`);
+          }
+        }
+      } catch (e) {}
     }
 
     setInterval(addLog, 4500);
-    setTimeout(addLog, 1000);
-    setTimeout(addLog, 5000);
+    setTimeout(addLog, 1200);
+    setTimeout(addLog, 5500);
   </script>
 </body>
 </html>

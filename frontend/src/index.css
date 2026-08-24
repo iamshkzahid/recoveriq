@@ -249,6 +249,47 @@ body::before {
   to { transform: rotate(360deg); }
 }
 
+/* ── Webhook Toast Notification ── */
+.webhook-toast {
+  position: fixed;
+  top: 24px;
+  right: 32px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(18, 18, 26, 0.95);
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.25), 0 0 15px rgba(0, 212, 255, 0.15);
+  backdrop-filter: blur(12px);
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  color: #f0f0f5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-family);
+  animation: toastGlow 2s infinite alternate;
+}
+
+@keyframes toastGlow {
+  0% { box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 10px rgba(0, 212, 255, 0.1); }
+  100% { box-shadow: 0 8px 32px rgba(0, 212, 255, 0.4), 0 0 20px rgba(0, 212, 255, 0.3); }
+}
+
+.toast-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 8px var(--accent-primary);
+  animation: pulseDot 1s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
 /* ── KPI Grid ── */
 .kpi-grid {
   display: grid;
