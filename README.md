@@ -97,41 +97,41 @@ A merchant-facing dashboard built with React 18, Recharts, and Framer Motion:
 
 ## 🏗️ Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                   FRONTEND (React 18)                   │
-│  ┌───────────┐ ┌──────────┐ ┌────────┐ ┌────────────┐  │
-│  │ KPI Cards │ │ Timeline │ │Heatmap │ │ Audit Log  │  │
-│  └─────┬─────┘ └────┬─────┘ └───┬────┘ └─────┬──────┘  │
-│        │             │           │             │         │
-│        └──────────┬──┴───────────┴─────────────┘         │
-│                   │ REST API + SSE Stream                │
-├───────────────────┼─────────────────────────────────────┤
-│                   │     API LAYER (FastAPI)              │
-│  ┌────────────────▼────────────────────────────────┐    │
-│  │ /api/webhooks/razorpay  ← Webhook Receiver      │    │
-│  │ /api/dashboard/metrics  ← KPI Aggregation       │    │
-│  │ /api/dashboard/timeline ← Recovery Timeline     │    │
-│  │ /api/dashboard/analytics← Charts & Heatmap      │    │
-│  │ /api/stream/events      ← SSE Real-Time Stream  │    │
-│  │ /api/simulate/batch     ← Demo Simulation       │    │
-│  │ /api/audit/log          ← Audit Trail           │    │
-│  │ /api/predict            ← Failure Prediction    │    │
-│  └─────────────────────────────────────────────────┘    │
+│  ┌───────────┐ ┌──────────┐ ┌────────┐ ┌────────────┐   │
+│  │ KPI Cards │ │ Timeline │ │Heatmap │ │ Audit Log  │   │
+│  └─────┬─────┘ └────┬─────┘ └───┬────┘ └─────┬──────┘   │
+│        │            │           │            │          │
+│        └────────────┴─────┬─────┴────────────┘          │
+│                           │ REST API + SSE Stream       │
+├───────────────────────────┼─────────────────────────────┤
+│                           ▼ API LAYER (FastAPI)         │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │ /api/webhooks/razorpay   ← Webhook Receiver       │  │
+│  │ /api/dashboard/metrics   ← KPI Aggregation        │  │
+│  │ /api/dashboard/timeline  ← Recovery Timeline      │  │
+│  │ /api/dashboard/analytics ← Charts & Heatmap       │  │
+│  │ /api/stream/events       ← SSE Real-Time Stream   │  │
+│  │ /api/simulate/batch      ← Demo Simulation        │  │
+│  │ /api/audit/log           ← Audit Trail            │  │
+│  │ /api/predict             ← Failure Prediction     │  │
+│  └───────────────────────────────────────────────────┘  │
 ├─────────────────────────────────────────────────────────┤
-│                 AI / ML ENGINE (Python)                  │
-│  ┌──────────────────┐  ┌───────────────────────────┐    │
-│  │ Failure Predictor │  │ Recovery Orchestrator     │    │
-│  │ (GradientBoosting)│  │ (Decision Tree + Rules)   │    │
-│  │ 12 features       │  │ Stopping rules, cooloff  │    │
-│  │ 0.81 AUC-ROC      │  │ Channel waterfall        │    │
-│  └──────────────────┘  └───────────────────────────┘    │
+│                 AI / ML ENGINE (Python)                 │
+│  ┌──────────────────┐  ┌─────────────────────────────┐  │
+│  │ Failure Predictor│  │ Recovery Orchestrator       │  │
+│  │ (GradientBoost)  │  │ (Decision Tree + Rules)     │  │
+│  │ 12 features      │  │ Stopping rules, cooloff     │  │
+│  │ 0.81 AUC-ROC     │  │ Channel waterfall           │  │
+│  └──────────────────┘  └─────────────────────────────┘  │
 ├─────────────────────────────────────────────────────────┤
-│                    DATA LAYER (SQLite)                   │
-│  ┌─────────────┐ ┌──────────────┐ ┌─────────────────┐  │
-│  │ Transactions │ │ Webhook      │ │ Recovery        │  │
-│  │ Table        │ │ Event Ledger │ │ Actions (Audit) │  │
-│  └─────────────┘ └──────────────┘ └─────────────────┘  │
+│                    DATA LAYER (SQLite)                  │
+│  ┌─────────────┐ ┌──────────────┐ ┌──────────────────┐  │
+│  │ Transactions│ │ Webhook      │ │ Recovery Actions │  │
+│  │ Table       │ │ Event Ledger │ │ (Audit)          │  │
+│  └─────────────┘ └──────────────┘ └──────────────────┘  │
 ├─────────────────────────────────────────────────────────┤
 │              EXTERNAL — Razorpay Test APIs              │
 │  Orders API │ Payments API │ Payment Links │ Webhooks   │
