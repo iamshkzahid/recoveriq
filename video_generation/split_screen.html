@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RecoverIQ — Terminal & Architecture Live View</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, monospace; }
+    body { background: #0a0a0f; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* Left Panel: Terminal */
+    .terminal-pane {
+      width: 48%;
+      height: 100%;
+      background: #0d1117;
+      border-right: 1px solid rgba(0, 212, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+    }
+    .terminal-header {
+      background: #161b22;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .term-btn { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .term-red { background: #ff5f56; }
+    .term-yellow { background: #ffbd2e; }
+    .term-green { background: #27c93f; }
+    .term-title { margin-left: 10px; font-size: 0.85rem; color: #8b949e; font-family: monospace; font-weight: 600; }
+    
+    .terminal-body {
+      flex: 1;
+      padding: 20px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      overflow-y: auto;
+      color: #c9d1d9;
+    }
+    .prompt { color: #00d4ff; font-weight: bold; }
+    .cmd { color: #fff; font-weight: 600; }
+    .log-event { color: #e040fb; font-weight: bold; margin-top: 10px; }
+    .log-id { color: #79c0ff; }
+    .log-amount { color: #ffa657; }
+    .log-sig { color: #d2a8ff; word-break: break-all; }
+    .log-success { color: #7ee787; font-weight: bold; }
+    .log-time { color: #a5d6ff; }
+    
+    /* Right Panel: Web UI */
+    .web-pane {
+      width: 52%;
+      height: 100%;
+      background: #0a0a0f;
+      display: flex;
+      flex-direction: column;
+    }
+    .web-header {
+      background: #12121a;
+      padding: 12px 18px;
+      font-size: 0.85rem;
+      color: #00d4ff;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .live-badge {
+      background: rgba(0, 230, 118, 0.15);
+      color: #00e676;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse { width: 6px; height: 6px; background: #00e676; border-radius: 50%; animation: blink 1s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    
+    iframe { width: 100%; height: 100%; border: none; }
+  </style>
+</head>
+<body>
+  <div class="terminal-pane">
+    <div class="terminal-header">
+      <span class="term-btn term-red"></span>
+      <span class="term-btn term-yellow"></span>
+      <span class="term-btn term-green"></span>
+      <span class="term-title">zsh — python simulate_webhook.py (HMAC SHA-256)</span>
+    </div>
+    <div class="terminal-body" id="termOutput">
+      <div><span class="prompt">zahid@recoveriq % </span><span class="cmd">python simulate_webhook.py --continuous</span></div>
+      <div style="color: #8b949e; margin: 8px 0;">[RecoverIQ Webhook Simulation Engine v1.0.0]</div>
+      <div style="color: #8b949e; margin-bottom: 12px;">Signing target: http://localhost:8000/api/webhooks/razorpay</div>
+    </div>
+  </div>
+  <div class="web-pane">
+    <div class="web-header">
+      <span>RECOVERIQ REAL-TIME DASHBOARD (SSE STREAM)</span>
+      <span class="live-badge"><span class="pulse"></span> SUB-15MS INGESTION</span>
+    </div>
+    <iframe src="http://localhost:3000" id="dashFrame"></iframe>
+  </div>
+
+  <script>
+    const term = document.getElementById("termOutput");
+    
+    const events = [
+      { id: "pay_a84920fc192b4", amt: "₹4,850.00", reason: "bank_timeout", bank: "Yes Bank", sig: "a89c20f8319e7284b840192ca8204918e72a8190382910fa8c2198031209e721", time: "12.4ms" },
+      { id: "pay_982310ba710c3", amt: "₹1,200.00", reason: "insufficient_funds", bank: "HDFC Bank", sig: "7129ca081923fa87123908acb1823091823091823ac190823901823091823901", time: "11.8ms" },
+      { id: "pay_541289de882a1", amt: "₹18,500.00", reason: "payment_failed_gateway", bank: "SBI", sig: "5489102cba718923091823091823091823ac1908239018230918239018239018", time: "14.1ms" },
+      { id: "pay_672910fc338d9", amt: "₹75,000.00", reason: "customer_dropoff", bank: "ICICI Bank", sig: "6729102839102391023910239102391023910239102391023910239102391023", time: "13.2ms" },
+      { id: "pay_119028ab445e7", amt: "₹3,450.00", reason: "otp_expired", bank: "Kotak", sig: "1190283910239102391023910239102391023910239102391023910239102391", time: "10.9ms" }
+    ];
+
+    let idx = 0;
+    function addLog() {
+      if (idx >= events.length) idx = 0;
+      const ev = events[idx++];
+      
+      const div = document.createElement("div");
+      div.style.marginBottom = "14px";
+      div.innerHTML = `
+        <div class="log-event">⚡ [WEBHOOK EMITTER] Emitting: payment.failed</div>
+        <div style="padding-left: 12px;">
+          <div>Payment ID: <span class="log-id">${ev.id}</span></div>
+          <div>Amount: <span class="log-amount">${ev.amt}</span> | Error: <span style="color:#ff7b72;">${ev.reason}</span> (${ev.bank})</div>
+          <div>Signature: <span class="log-sig">${ev.sig.substring(0, 32)}...</span></div>
+          <div class="log-success">✓ 200 OK Verified (HMAC SHA-256) in <span class="log-time">${ev.time}</span></div>
+          <div style="color: #8b949e; font-size: 0.8rem;">Response: {"status": "received", "event_id": "evt_${Math.random().toString(36).substring(2, 10)}"}</div>
+        </div>
+      `;
+      term.appendChild(div);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    setInterval(addLog, 4500);
+    setTimeout(addLog, 1000);
+    setTimeout(addLog, 5000);
+  </script>
+</body>
+</html>

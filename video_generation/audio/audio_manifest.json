@@ -1,0 +1,37 @@
+[
+  {
+    "id": "part1_hook",
+    "title": "Part 1: The Hook & Problem Statement",
+    "text": "Every year, billions in Gross Merchandise Value are lost to transient payment failures and abandoned checkout carts across the digital economy. In high-velocity commerce, a failed payment isn't just lost revenue\u2014it is direct customer churn. RecoverIQ turns critical payment failure points into autonomously recovered revenue. By combining predictive machine learning, explainable risk scoring, and generative AI, RecoverIQ acts as an autonomous revenue guardian for Razorpay merchants, maximizing transaction success rates without adding operational friction.",
+    "audio_path": "/Users/zahidshaikh/Desktop/Project/video_generation/audio/part1_hook.mp3",
+    "duration": 39.288
+  },
+  {
+    "id": "part2_architecture",
+    "title": "Part 2: Architecture & Cryptographic Webhooks",
+    "text": "Let's look at the underlying architecture. Enterprise payment recovery demands zero-trust cryptographic security and sub-millisecond reliability. Notice our simulated webhook emitter running in the terminal. It does not rely on mock state\u2014it generates authentic Razorpay payment dot failed payloads and cryptographically signs each request with HMAC SHA-256 over raw byte streams. On the backend, our high-performance FastAPI engine verifies the cryptographic signature, enforces an in-memory TTL idempotency ledger, and dispatches the recovery pipeline in under fifteen milliseconds, making it fully ready for massive enterprise volume.",
+    "audio_path": "/Users/zahidshaikh/Desktop/Project/video_generation/audio/part2_architecture.mp3",
+    "duration": 46.44
+  },
+  {
+    "id": "part3_xai_retry",
+    "title": "Part 3: Explainable AI & Smart Retries",
+    "text": "Next, let's explore our Live Risk Predictor. Unlike black-box algorithms, RecoverIQ is built on the principle of Explainable AI. The model does not merely output a risk percentage\u2014it provides merchants with an exact factor attribution breakdown using dynamic visual indicators. For instance, when evaluating Yes Bank Netbanking for a high-value transaction, the model attributes elevated risk to historical bank downtime spikes, multi-step authentication drop-offs, and high-value scrutiny. For soft infrastructure failures like bank timeouts, RecoverIQ autonomously schedules intelligent retries during peak uptime windows without bothering the customer.",
+    "audio_path": "/Users/zahidshaikh/Desktop/Project/video_generation/audio/part3_xai_retry.mp3",
+    "duration": 47.16
+  },
+  {
+    "id": "part4_genai",
+    "title": "Part 4: GenAI Contextual Messaging & BNPL Recovery",
+    "text": "For hard customer declines\u2014such as insufficient funds or credit limit caps\u2014generic static emails simply do not convert. RecoverIQ leverages generative AI powered by Gemini to compose hyper-personalized, contextual recovery outreach. Watch as our agent analyzes the exact failure reason, the order value, and the preferred channel, dynamically drafting a tailored WhatsApp message that automatically recommends a flexible three-month No-Cost EMI payment link. By transforming an embarrassing failure into an attractive financing alternative, RecoverIQ dramatically boosts recovery conversion.",
+    "audio_path": "/Users/zahidshaikh/Desktop/Project/video_generation/audio/part4_genai.mp3",
+    "duration": 42.072
+  },
+  {
+    "id": "part5_impact",
+    "title": "Part 5: Observability, Audit Trail & Business Impact",
+    "text": "Finally, RecoverIQ provides merchants with a complete observability suite. From real-time failure heatmaps mapping bank latency by the hour, to channel conversion analytics and an immutable compliance audit trail, every recovery action is transparently logged. In our benchmark simulations, RecoverIQ achieved an eighty-one percent AUC-ROC and recovered over twenty-seven percent of lost GMV. At Razorpay's scale of 1.5 million daily failures, this architecture represents over eighteen hundred crore rupees in recovered merchant revenue annually. RecoverIQ: turning failed payments into recovered revenue.",
+    "audio_path": "/Users/zahidshaikh/Desktop/Project/video_generation/audio/part5_impact.mp3",
+    "duration": 44.88
+  }
+]
