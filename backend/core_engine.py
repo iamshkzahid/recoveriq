@@ -763,6 +763,11 @@ async def health_check():
 
 # ---- Webhook Receiver ----
 
+from cachetools import TTLCache
+
+# In-memory TTL cache for event idempotency (TTL: 1 hour, max 10,000 items)
+idempotency_cache = TTLCache(maxsize=10000, ttl=3600)
+
 @app.post("/api/webhooks/razorpay")
 async def receive_webhook(request: Request, background_tasks: BackgroundTasks):
     """
@@ -793,10 +798,21 @@ async def receive_webhook(request: Request, background_tasks: BackgroundTasks):
     payment_data = payload.get("payload", {}).get("payment", {}).get("entity", {})
     payment_id = payment_data.get("id", f"pay_{uuid.uuid4().hex[:14]}")
 
-    # Step 3: Idempotency check
+    # Step 3: Idempotency check using in-memory TTL cache
     conn = get_db()
     event_id = f"evt_{uuid.uuid4().hex[:12]}"
     sig_hash = hashlib.sha256(f"{payment_id}:{event_type}:{signature}".encode()).hexdigest()[:32]
+    
+    # Composite key for idempotency
+    idempotency_key = f"{payment_id}:{event_type}:{sig_hash}"
+    
+    if idempotency_key in idempotency_cache:
+        conn.close()
+        logger.info(f"Duplicate webhook ignored (TTL Cache Hit): {payment_id}/{event_type}")
+        return {"status": "duplicate", "message": "Event already processed"}
+    
+    # Mark in cache
+    idempotency_cache[idempotency_key] = True
 
     try:
         conn.execute(
@@ -807,7 +823,7 @@ async def receive_webhook(request: Request, background_tasks: BackgroundTasks):
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
-        logger.info(f"Duplicate webhook ignored: {payment_id}/{event_type}")
+        logger.info(f"Duplicate webhook ignored (DB Constraint Hit): {payment_id}/{event_type}")
         return {"status": "duplicate", "message": "Event already processed"}
 
     # Step 4: Store transaction
