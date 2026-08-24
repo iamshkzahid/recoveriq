@@ -12,9 +12,13 @@
 
 ---
 
-## 🎬 Demo Video
+## 🎬 Master Pitch Video (Product + Engineering Deep Dive)
 
-📹 [Watch the 5-Minute Pitch Video →](#) *(link to be added)*
+📹 **[Watch the 4.5-Minute Gold Master Pitch Video](https://youtu.be/your-unlisted-link-here)**
+
+Our pitch video is divided into two phases to showcase both the product experience and the underlying engineering:
+1. **Phase 1 (Product Demo):** Live dashboard navigation, split-screen HMAC SHA-256 webhook simulation, XAI risk recalculation, and real-time GenAI WhatsApp message streaming.
+2. **Phase 2 (Code Deep Dive):** VSCode walkthrough of `await request.body()` raw byte validation, the constant-time `hmac.new()` verification, the TTL idempotency cache, and the dual-waterfall ML routing pipeline.
 
 ---
 
@@ -27,12 +31,13 @@
 | **Recovery Rate** | **27.7%** |
 | **Revenue Recovered** | **₹9,86,853** |
 | ML Model AUC-ROC | 0.81 (5-fold CV) |
-| Recovery Channels | WhatsApp, SMS, Email, Smart Retry, Instrument Switch |
+| Recovery Channels | WhatsApp (GenAI), SMS, Email, Smart Retry, Instrument Switch |
 | Avg Recovery Time | 8.4 minutes |
-| Audit Trail Coverage | 100% — every action logged |
+| Audit Trail Coverage | 100% — every action logged immutably |
 | Live Risk Prediction | Per-bank, per-instrument, real-time |
-| Explainable AI (XAI) | Per-prediction factor decomposition |
-| GenAI Messaging | Context-aware WhatsApp/SMS drafts |
+| **Explainable AI (XAI)** | Live recalculating risk factor breakdown |
+| **Generative AI (LLM)** | Gemini 2.5 context-aware WhatsApp/SMS drafts offering EMI |
+| **Security** | Zero-Mismatch HMAC SHA-256 with raw byte validation |
 
 ---
 
@@ -74,7 +79,12 @@ payment.failed webhook received
         └── ESCALATE to manual review (compliance)
 ```
 
-### 3. 📈 MEASURE — Real-Time Dashboard
+### 3. ✨ GENAI & XAI — Explainability and Contextual Outreach
+
+- **Explainable AI (XAI):** The dashboard features a live risk predictor that breaks down the probability score into animated, color-coded factor bars (e.g., Bank Latency, Time of Day, Instrument Type), providing absolute transparency to merchants.
+- **Generative AI (Gemini 2.5):** For hard failures (e.g., insufficient funds), our integrated LLM agent drafts highly contextual WhatsApp messages. It analyzes the failure reason and amount to dynamically offer solutions like a 3-Month No-Cost EMI, streaming the generated text back to the dashboard via typewriter animation.
+
+### 4. 📈 MEASURE — Real-Time Dashboard
 
 A merchant-facing dashboard built with React 18, Recharts, and Framer Motion:
 - **KPI Cards**: Revenue at Risk, Revenue Recovered, Recovery Rate, Active Recoveries
@@ -249,11 +259,14 @@ curl http://localhost:8000/api/audit/log
 
 ## 🔬 Technical Deep-Dive
 
-### 1. Webhook Idempotency & Race Conditions
+### 1. Zero-Mismatch Cryptography & Idempotency
 
-Razorpay webhooks can arrive out-of-order or duplicated. A `payment.captured` for a retry can arrive before the original `payment.failed`. Without idempotent processing, the system would trigger redundant recovery actions.
+Razorpay webhooks can arrive out-of-order or duplicated. A `payment.captured` for a retry can arrive before the original `payment.failed`. Without idempotent processing, the system would trigger redundant recovery actions. Furthermore, parsing the webhook body to JSON before generating the HMAC signature often leads to hash mismatches due to whitespace stripping.
 
-**Solution**: Composite-key deduplication using `(payment_id, event_type, signature_hash)` in a webhook event ledger. Every incoming webhook is checked against the ledger before processing. The recovery orchestrator also verifies current payment status before executing any action. All state transitions use version counters to prevent concurrent mutation.
+**Solution**: 
+1. **Raw Byte Verification:** `core_engine.py` intercepts `body = await request.body()` to perform the `hmac.new()` SHA-256 calculation on the exact, unmodified byte stream sent by Razorpay.
+2. **Constant-Time Comparison:** Uses `hmac.compare_digest()` to prevent timing attacks.
+3. **Dual-Layer Idempotency:** Implements a sub-millisecond in-memory TTL cache alongside a SQLite composite-key deduplication (`payment_id:event_type:signature_prefix`) to guarantee 100% protection against replay storms.
 
 ### 2. ML Cold-Start & Feature Engineering
 
