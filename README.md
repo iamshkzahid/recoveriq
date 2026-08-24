@@ -26,11 +26,13 @@
 | Payment Failure Rate | ~10.8% (realistic) |
 | **Recovery Rate** | **27.7%** |
 | **Revenue Recovered** | **₹9,86,853** |
-| ML Model AUC-ROC | 0.73 (5-fold CV) |
+| ML Model AUC-ROC | 0.81 (5-fold CV) |
 | Recovery Channels | WhatsApp, SMS, Email, Smart Retry, Instrument Switch |
 | Avg Recovery Time | 8.4 minutes |
 | Audit Trail Coverage | 100% — every action logged |
 | Live Risk Prediction | Per-bank, per-instrument, real-time |
+| Explainable AI (XAI) | Per-prediction factor decomposition |
+| GenAI Messaging | Context-aware WhatsApp/SMS drafts |
 
 ---
 
@@ -239,7 +241,9 @@ curl http://localhost:8000/api/audit/log
 | `GET` | `/api/stream/events` | SSE endpoint for real-time updates |
 | `POST` | `/api/simulate/batch` | Trigger transaction simulation |
 | `GET` | `/api/audit/log` | Paginated audit trail |
-| `GET` | `/api/predict` | Failure probability prediction |
+| `GET` | `/api/predict` | Failure probability prediction + XAI factors |
+| `POST` | `/api/generate-message` | GenAI personalized recovery message |
+| `POST` | `/api/seed/demo` | Seed database with historical demo data |
 
 ---
 
@@ -300,7 +304,7 @@ recoveriq/
         ├── App.jsx
         ├── index.css           # Design system & global styles
         └── components/
-            └── MainDashboard.jsx  # Dashboard + Risk Prediction Panel
+            └── MainDashboard.jsx  # Dashboard + Risk Prediction + XAI + GenAI
 ```
 
 ---

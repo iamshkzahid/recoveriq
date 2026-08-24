@@ -535,6 +535,14 @@ class RecoveryOrchestrator:
         logger.info(f"Recovery action created: {action.action_id} | {strategy} | {channel}")
         return action
 
+    # ── Failure Classification ──
+    # Soft failures = transient, retryable (gateway timeouts, bank infra issues)
+    # Hard failures = permanent, customer-facing (insufficient funds, card expired)
+    SOFT_FAILURE_SOURCES = {"gateway", "bank"}
+    SOFT_FAILURE_REASONS = {"network_error", "bank_timeout", "gateway_unavailable",
+                            "gateway_timeout", "processing_error", "server_error"}
+    HARD_DECLINE_SOURCES = {"razorpay"}  # Risk engine declines — do not retry
+
     def _select_strategy(
         self,
         error_source: str,
@@ -545,14 +553,24 @@ class RecoveryOrchestrator:
         instrument: str,
     ) -> tuple[RecoveryStrategy, str, str]:
         """
-        Select the optimal recovery strategy.
+        Select the optimal recovery strategy using soft/hard failure classification.
         
         Decision tree:
-        1. If failure_prob > 0.70 → preemptive instrument switch
-        2. If error_source == 'gateway' → smart retry (bank-side issue, retryable)
-        3. If error_source == 'customer' → payment link via optimal channel
-        4. Channel waterfall: WhatsApp > SMS > Email (based on contact count)
+        1. If risk_engine decline (Razorpay source) → NO_ACTION (hard decline)
+        2. If failure_prob > 0.70 → preemptive instrument switch
+        3. If SOFT failure (gateway/bank transient) → smart retry at optimal window
+        4. If HARD failure (customer-side) → GenAI personalized payment link
+        5. Channel waterfall: WhatsApp > SMS > Email (based on contact count)
         """
+        # Hard decline by Razorpay risk engine — never retry
+        if error_source in self.HARD_DECLINE_SOURCES:
+            return (
+                RecoveryStrategy.NO_ACTION,
+                None,
+                f"Hard decline by Razorpay risk engine ({error_reason}). "
+                f"Transaction flagged — no automated retry permitted per compliance policy.",
+            )
+
         if failure_prob > PREEMPTIVE_THRESHOLD:
             return (
                 RecoveryStrategy.PREEMPTIVE_SWITCH,
@@ -562,17 +580,18 @@ class RecoveryOrchestrator:
                 f"Alternative: UPI if currently card, or card if currently UPI.",
             )
 
-        if error_source == "gateway":
-            # Gateway errors are transient — smart retry at optimal window
+        # Soft failures (gateway/bank infra) — transient, safe to smart-retry
+        if error_source in self.SOFT_FAILURE_SOURCES or error_reason in self.SOFT_FAILURE_REASONS:
             return (
                 RecoveryStrategy.SMART_RETRY,
                 "auto_retry",
-                f"Gateway error ({error_reason}) detected from {bank}. "
+                f"Soft failure detected: {error_source}/{error_reason} from {bank}. "
                 f"Current failure probability: {failure_prob:.2%}. "
                 f"Scheduling smart retry during optimal bank uptime window (2-6 PM IST).",
             )
 
-        # Customer errors — send payment link via optimal channel
+        # Hard failures (customer-side: insufficient funds, OTP expired, etc.)
+        # → Send personalized GenAI recovery message via optimal channel
         # Waterfall: WhatsApp (highest conversion) → SMS → Email
         if contact_count == 0:
             return (

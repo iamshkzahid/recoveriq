@@ -210,6 +210,34 @@ const KPICard = ({ title, value, prefix, suffix, icon: Icon, color, trend, trend
 // RECOVERY TIMELINE COMPONENT
 // =============================================================================
 
+const TypewriterText = ({ text, speed = 12 }) => {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    setDisplayed("");
+    setDone(false);
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayed(text.slice(0, i + 1));
+        i++;
+      } else {
+        setDone(true);
+        clearInterval(timer);
+      }
+    }, speed);
+    return () => clearInterval(timer);
+  }, [text, speed]);
+
+  return (
+    <span>
+      {displayed}
+      {!done && <span className="typing-cursor">|</span>}
+    </span>
+  );
+};
+
 const TimelineItem = ({ action }) => {
   const [genAiMessage, setGenAiMessage] = useState(null);
   const [generating, setGenerating] = useState(false);
@@ -284,18 +312,42 @@ const TimelineItem = ({ action }) => {
         </div>
         <p className="timeline-reasoning">{action.reasoning}</p>
         
-        {/* GenAI Message Display */}
+        {/* GenAI Generating Indicator */}
+        {generating && (
+          <motion.div 
+            className="genai-message-box generating"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <div className="genai-message-header">
+              <Zap size={12} color="#00d4ff" /> 
+              <span>Gemini AI Drafting Message</span>
+              <span className="genai-thinking-dots">...</span>
+            </div>
+            <div className="genai-skeleton">
+              <div className="skeleton-line" style={{ width: '90%' }} />
+              <div className="skeleton-line" style={{ width: '70%' }} />
+              <div className="skeleton-line" style={{ width: '80%' }} />
+            </div>
+          </motion.div>
+        )}
+
+        {/* GenAI Message Display with Typewriter */}
         {genAiMessage && (
           <motion.div 
             className="genai-message-box"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
+            transition={{ duration: 0.3 }}
           >
             <div className="genai-message-header">
               <Zap size={12} color="#00d4ff" /> 
               <span>AI Generated Message</span>
+              <span className="genai-model-badge">Gemini 2.5</span>
             </div>
-            <p className="genai-message-text">{genAiMessage}</p>
+            <p className="genai-message-text">
+              <TypewriterText text={genAiMessage} speed={12} />
+            </p>
           </motion.div>
         )}
 
@@ -749,17 +801,33 @@ const RiskPredictionPanel = () => {
             {prediction.xai_factors && prediction.xai_factors.length > 0 && (
               <div className="xai-container">
                 <div className="xai-header">
-                  <Activity size={14} /> Explainable AI (Model Factors)
+                  <Activity size={14} /> Explainable AI — Why this prediction?
                 </div>
                 {prediction.xai_factors.map((factor, idx) => {
                   const isPositive = factor.impact.startsWith("-");
+                  const impactNum = parseInt(factor.impact.replace(/[^0-9]/g, "")) || 0;
+                  const barWidth = factor.impact === "Neutral" ? 5 : Math.min(impactNum, 50);
                   return (
-                    <div key={idx} className="xai-factor-row">
+                    <motion.div 
+                      key={idx} 
+                      className="xai-factor-row"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.15 }}
+                    >
                       <span className="xai-factor-name">{factor.factor}</span>
-                      <span className={`xai-factor-impact ${isPositive ? "positive" : "negative"}`}>
+                      <div className="xai-bar-container">
+                        <motion.div
+                          className={`xai-bar ${isPositive ? "xai-bar-safe" : factor.impact === "Neutral" ? "xai-bar-neutral" : "xai-bar-risk"}`}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${barWidth * 2}px` }}
+                          transition={{ duration: 0.6, delay: idx * 0.15 }}
+                        />
+                      </div>
+                      <span className={`xai-factor-impact ${isPositive ? "positive" : factor.impact === "Neutral" ? "" : "negative"}`}>
                         {factor.impact}
                       </span>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
