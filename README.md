@@ -14,10 +14,10 @@
 
 ## 🎬 Master Pitch Video (Product + Engineering Deep Dive)
 
-📹 **[Watch the 4.5-Minute Gold Master Pitch Video](https://youtu.be/your-unlisted-link-here)**
+📹 **[Watch the 2:50-Minute Gold Master Pitch Video](https://drive.google.com/drive/folders/1nvn3DyajJsWHF5BpaE2-UYEM4YEErIjJ?usp=drive_link)**
 
-Our pitch video is divided into two phases to showcase both the product experience and the underlying engineering:
-1. **Phase 1 (Product Demo):** Live dashboard navigation, split-screen HMAC SHA-256 webhook simulation, XAI risk recalculation, and real-time GenAI WhatsApp message streaming.
+Our highly-condensed pitch video is divided into two phases to showcase both the product experience and the underlying engineering:
+1. **Phase 1 (Product Demo):** Live dashboard navigation (with custom ripple cursor interactions), split-screen HMAC SHA-256 webhook simulation with real-time toast notifications, XAI risk recalculation, and real-time GenAI WhatsApp message streaming.
 2. **Phase 2 (Code Deep Dive):** VSCode walkthrough of `await request.body()` raw byte validation, the constant-time `hmac.new()` verification, the TTL idempotency cache, and the dual-waterfall ML routing pipeline.
 
 ---
